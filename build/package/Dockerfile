@@ -1,4 +1,4 @@
-FROM golang:1.14.4-buster AS builder
+FROM golang:1.14.6-buster AS builder
 
 WORKDIR /go/src/bench-api
 
