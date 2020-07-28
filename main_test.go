@@ -55,4 +55,12 @@ func TestGreet(t *testing.T) {
 func TestFibonacci(t *testing.T) {
 	// should return {"number": <n>, "fibonacci": <nth fibonacci number>} where the number n
 	// is given by the user.
+	res, err := DoRequest(testServer, http.MethodGet, "/fibonacci/22")
+	assert.NoError(t, err)
+
+	assert.Equal(t, http.StatusOK, res.Code)
+
+	body, err := ioutil.ReadAll(res.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, `{"number": 22, "fibonacci", 17711}`, string(body))
 }
