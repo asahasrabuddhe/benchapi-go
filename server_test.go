@@ -25,7 +25,7 @@ func DoRequest(handler http.Handler, method, url string) (*httptest.ResponseReco
 }
 
 func TestMain(m *testing.M) {
-	testServer = newServer()
+	testServer = NewServer()
 	os.Exit(m.Run())
 }
 
@@ -73,6 +73,7 @@ func TestFibonacci(t *testing.T) {
 
 			body, err := ioutil.ReadAll(res.Body)
 			assert.NoError(t, err)
+
 
 			if ft.err {
 				assert.Equal(t, http.StatusBadRequest, res.Code)
