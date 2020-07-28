@@ -1,6 +1,7 @@
 package bench_api
 
 import (
+	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +19,7 @@ func TestMain(m *testing.M) {
 func TestGet(t *testing.T) {
 	// should return {"message": "Hello, world!"}
 	req, err := http.NewRequest(http.MethodGet, "/", nil)
-	assert.NoErr(t, err)
+	assert.NoError(t, err)
 
 	res := httptest.NewRecorder()
 	testServer.ServeHTTP(res, req)
@@ -26,7 +27,7 @@ func TestGet(t *testing.T) {
 	assert.Equal(t, http.StatusOK, res.Code)
 
 	body, err := ioutil.ReadAll(res.Body)
-	assert.NoErr(t, err)
+	assert.NoError(t, err)
 	assert.Equal(t, `{"message": "Hello, world!"}`, string(body))
 }
 
