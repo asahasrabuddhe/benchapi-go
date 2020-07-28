@@ -3,6 +3,7 @@ package bench_api
 import (
 	"fmt"
 	"github.com/go-chi/chi"
+	"github.com/go-chi/chi/middleware"
 	"net/http"
 	"strconv"
 )
@@ -12,8 +13,11 @@ type server struct {
 }
 
 func NewServer() *server {
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+
 	s := &server{
-		router: chi.NewRouter(),
+		router: r,
 	}
 
 	s.routes()
