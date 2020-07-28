@@ -1,6 +1,9 @@
 package bench_api
 
 import (
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 )
@@ -14,6 +17,17 @@ func TestMain(m *testing.M) {
 
 func TestGet(t *testing.T) {
 	// should return {"message": "Hello, world!"}
+	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	assert.NoErr(t, err)
+
+	res := httptest.NewRecorder()
+	testServer.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusOK, res.Code)
+
+	body, err := ioutil.ReadAll(res.Body)
+	assert.NoErr(t, err)
+	assert.Equal(t, `{"message": "Hello, world!"}`, string(body))
 }
 
 func TestGreet(t *testing.T) {
