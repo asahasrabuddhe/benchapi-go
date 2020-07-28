@@ -4,8 +4,6 @@ WORKDIR /go/src/bench-api
 
 COPY ./ ./
 
-RUN ls -la cmd
-
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /go/bin/benchapi -ldflags="-s -w" cmd/benchapi/main.go
 
 FROM scratch
