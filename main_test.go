@@ -42,7 +42,7 @@ func TestGet(t *testing.T) {
 
 func TestGreet(t *testing.T) {
 	// should return {"message": "Hello, <name>!"} where the name is given by the user
-	res, err := DoRequest(testServer, http.MethodGet, "/ajitem")
+	res, err := DoRequest(testServer, http.MethodGet, "/greet/ajitem")
 	assert.NoError(t, err)
 
 	assert.Equal(t, http.StatusOK, res.Code)

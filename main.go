@@ -25,7 +25,7 @@ func (s *server) routes() {
 		_, _ = fmt.Fprint(writer, `{"message": "Hello, world!"}`)
 	})
 
-	s.router.Get("/{name}", func(writer http.ResponseWriter, request *http.Request) {
+	s.router.Get("/greet/{name}", func(writer http.ResponseWriter, request *http.Request) {
 		name := chi.URLParam(request, "name")
 
 		_, _ = fmt.Fprintf(writer, `{"message": "Hello, %s!"}`, name)
