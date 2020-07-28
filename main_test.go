@@ -33,6 +33,17 @@ func TestGet(t *testing.T) {
 
 func TestGreet(t *testing.T) {
 	// should return {"message": "Hello, <name>!"} where the name is given by the user
+	req, err := http.NewRequest(http.MethodGet, "/ajitem", nil)
+	assert.NoError(t, err)
+
+	res := httptest.NewRecorder()
+	testServer.ServeHTTP(res, req)
+
+	assert.Equal(t, http.StatusOK, res.Code)
+
+	body, err := ioutil.ReadAll(res.Body)
+	assert.NoError(t, err)
+	assert.Equal(t, `{"message": "Hello, ajitem!"}`, string(body))
 }
 
 func TestFibonacci(t *testing.T) {
