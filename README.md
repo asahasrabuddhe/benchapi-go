@@ -1,4 +1,4 @@
-#Bench API Go
+# Bench API Go
 
 The Bench API is a simple server written in Go to help benchmark the performance of the Go language. It has 3 endpoints
 
