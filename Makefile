@@ -1,5 +1,9 @@
 VERSION := $(shell date -u +%Y%m%dT%H%M%S)
 
+.PHONY: test
+test:
+	go test .
+
 .PHONY: build
-build:
+build: test
 	docker build -f build/package/Dockerfile -t ajitemsahasrabuddhe/benchapi-go:$(VERSION) -t ajitemsahasrabuddhe/benchapi-go:latest .
