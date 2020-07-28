@@ -1,9 +1,10 @@
 package bench_api
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/stretchr/testify/assert"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -24,6 +25,15 @@ func DoRequest(handler http.Handler, method, url string) (*httptest.ResponseReco
 	return res, nil
 }
 
+func ParseBody(body io.Reader) *response {
+	var res response
+
+	decoder := json.NewDecoder(body)
+	_ = decoder.Decode(&res)
+
+	return &res
+}
+
 func TestMain(m *testing.M) {
 	testServer = NewServer()
 	os.Exit(m.Run())
@@ -36,9 +46,8 @@ func TestGet(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, res.Code)
 
-	body, err := ioutil.ReadAll(res.Body)
-	assert.NoError(t, err)
-	assert.Equal(t, `{"message": "Hello, world!"}`, string(body))
+	resp := ParseBody(res.Body)
+	assert.Equal(t, "Hello, world!", resp.Message)
 }
 
 func TestGreet(t *testing.T) {
@@ -57,13 +66,12 @@ func TestGreet(t *testing.T) {
 			res, err := DoRequest(testServer, http.MethodGet, fmt.Sprintf("/greet/%s", tt.name))
 			assert.NoError(t, err)
 
-			body, err := ioutil.ReadAll(res.Body)
-			assert.NoError(t, err)
+			resp := ParseBody(res.Body)
 			if tt.err {
 				assert.Equal(t, http.StatusNotFound, res.Code)
 			} else {
 				assert.Equal(t, http.StatusOK, res.Code)
-				assert.Equal(t, fmt.Sprintf(`{"message": "Hello, %s!"}`, tt.name), string(body))
+				assert.Equal(t, fmt.Sprintf("Hello, %s!", tt.name), resp.Message)
 			}
 		})
 	}
@@ -73,17 +81,17 @@ func TestFibonacci(t *testing.T) {
 	// should return {"number": <n>, "fibonacci": <nth fibonacci number>} where the number n
 	// is given by the user.
 	var tests = []struct {
-		name   string
-		input  string
-		output string
-		err    bool
+		name      string
+		input     string
+		fibonacci string
+		err       bool
 	}{
-		{name: "valid input 1", input: "1", output: "1"},
-		{name: "valid input 2", input: "2", output: "1"},
-		{name: "valid input 3", input: "3", output: "2"},
-		{name: "valid input 22", input: "22", output: "17711"},
-		{name: "valid input 32", input: "32", output: "2178309"},
-		{name: "valid input 64", input: "64", output: "10610209857723"},
+		{name: "valid input 1", input: "1", fibonacci: "1"},
+		{name: "valid input 2", input: "2", fibonacci: "1"},
+		{name: "valid input 3", input: "3", fibonacci: "2"},
+		{name: "valid input 22", input: "22", fibonacci: "17711"},
+		{name: "valid input 32", input: "32", fibonacci: "2178309"},
+		{name: "valid input 64", input: "64", fibonacci: "10610209857723"},
 		{name: "invalid input string", input: "abcd", err: true},
 	}
 
@@ -92,15 +100,14 @@ func TestFibonacci(t *testing.T) {
 			res, err := DoRequest(testServer, http.MethodGet, fmt.Sprintf("/fibonacci/%s", tt.input))
 			assert.NoError(t, err)
 
-			body, err := ioutil.ReadAll(res.Body)
-			assert.NoError(t, err)
-
+			resp := ParseBody(res.Body)
 			if tt.err {
 				assert.Equal(t, http.StatusBadRequest, res.Code)
-				assert.Equal(t, `{"error": "fibonacci endpoint accepts only numbers"}`, string(body))
+				assert.Equal(t, "fibonacci endpoint accepts only numbers", resp.Error)
 			} else {
 				assert.Equal(t, http.StatusOK, res.Code)
-				assert.Equal(t, fmt.Sprintf(`{"number": %s, "fibonacci": %s}`, tt.input, tt.output), string(body))
+				assert.Equal(t, tt.input, resp.Input)
+				assert.Equal(t, tt.fibonacci, resp.Fibonacci)
 			}
 		})
 	}

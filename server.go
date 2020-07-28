@@ -1,6 +1,7 @@
 package bench_api
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
@@ -10,6 +11,13 @@ import (
 
 type server struct {
 	router *chi.Mux
+}
+
+type response struct {
+	Message   string `json:"message,omitempty"`
+	Input     string `json:"input,omitempty"`
+	Fibonacci string `json:"fibonacci,omitempty"`
+	Error     string `json:"error,omitempty"`
 }
 
 func NewServer() *server {
@@ -27,21 +35,31 @@ func NewServer() *server {
 
 func (s *server) routes() {
 	s.router.Get("/", func(writer http.ResponseWriter, request *http.Request) {
-		_, _ = fmt.Fprint(writer, `{"message": "Hello, world!"}`)
+		res := &response{Message: "Hello, world!"}
+
+		encoder := json.NewEncoder(writer)
+		_ = encoder.Encode(res)
 	})
 
 	s.router.Get("/greet/{name}", func(writer http.ResponseWriter, request *http.Request) {
 		name := chi.URLParam(request, "name")
+		res := &response{Message: fmt.Sprintf("Hello, %s!", name)}
 
-		_, _ = fmt.Fprintf(writer, `{"message": "Hello, %s!"}`, name)
+		encoder := json.NewEncoder(writer)
+		_ = encoder.Encode(&res)
 	})
 
 	s.router.Get("/fibonacci/{number}", func(writer http.ResponseWriter, request *http.Request) {
+		encoder := json.NewEncoder(writer)
+
 		numberStr := chi.URLParam(request, "number")
 		number, err := strconv.Atoi(numberStr)
 		if err != nil {
 			writer.WriteHeader(http.StatusBadRequest)
-			_, _ = fmt.Fprint(writer, `{"error": "fibonacci endpoint accepts only numbers"}`)
+
+			res := &response{Error: "fibonacci endpoint accepts only numbers"}
+			_ = encoder.Encode(&res)
+
 			return
 		}
 
@@ -60,7 +78,8 @@ func (s *server) routes() {
 			result = fibonacci()
 		}
 
-		_, _ = fmt.Fprintf(writer, `{"number": %d, "fibonacci": %d}`, number, result)
+		res := &response{Input: fmt.Sprintf("%d", number), Fibonacci: fmt.Sprintf("%d", result)}
+		_ = encoder.Encode(&res)
 	})
 }
 
