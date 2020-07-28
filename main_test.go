@@ -11,6 +11,18 @@ import (
 
 var testServer *server
 
+func DoRequest(handler http.Handler, method, url string) (*httptest.ResponseRecorder, error) {
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	res := httptest.NewRecorder()
+	handler.ServeHTTP(res, req)
+
+	return res, nil
+}
+
 func TestMain(m *testing.M) {
 	testServer = newServer()
 	os.Exit(m.Run())
@@ -18,11 +30,8 @@ func TestMain(m *testing.M) {
 
 func TestGet(t *testing.T) {
 	// should return {"message": "Hello, world!"}
-	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	res, err := DoRequest(testServer, http.MethodGet, "/")
 	assert.NoError(t, err)
-
-	res := httptest.NewRecorder()
-	testServer.ServeHTTP(res, req)
 
 	assert.Equal(t, http.StatusOK, res.Code)
 
@@ -33,11 +42,8 @@ func TestGet(t *testing.T) {
 
 func TestGreet(t *testing.T) {
 	// should return {"message": "Hello, <name>!"} where the name is given by the user
-	req, err := http.NewRequest(http.MethodGet, "/ajitem", nil)
+	res, err := DoRequest(testServer, http.MethodGet, "/ajitem")
 	assert.NoError(t, err)
-
-	res := httptest.NewRecorder()
-	testServer.ServeHTTP(res, req)
 
 	assert.Equal(t, http.StatusOK, res.Code)
 
